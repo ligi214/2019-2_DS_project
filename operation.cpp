@@ -22,11 +22,12 @@ extern int current;  // deal with token index while building parse tree
 const char LEFTPAREN = '(';
 const char RIGHTPAREN = ')';
 
-int token_current = 0;  // to pushback into tokens array
+extern int token_current;  // to pushback into tokens array
 int freeroot = 1;
 
 void initialize(){
-    for(int i=0;i<30;i++){
+    token_current = 0;
+    for(int i=0;i<31;i++){
         memArray[i].setfree(true);
         memArray[i].setrchild(i+1);
         memArray[i].setlchild(NULL);
@@ -71,30 +72,30 @@ void clear(){
         tokens[i] = "";
     }
 }
-
-
+/*
 void rightparentokenizer(string data){
     if(data[data.size()-1] == ')'){
         rightparentokenizer(data.substr(0, data.size()-1));
         pushback(")");
     }
-    else pushback(data);
+    else tokenizer(data);
 }
-
+*/
 void tokenizer(string data){ // Tokenize input string
     string token;
     stringstream ss(data);
-    
     int front = 0;
     current = -1;
-    token_current = 0;
     while(ss >> token){
         if(token[0] == '('){ // Tokenize left parenthesis
             pushback("(");
-            pushback(token.substr(1));
+            tokenizer(token.substr(1));
+            // pushback(token.substr(1));
         }
         else if(token[token.size()-1] == ')'){ // Tokenize right parenthesis
-            rightparentokenizer(token);
+            // rightparentokenizer(token);
+            tokenizer(token.substr(0, token.size()-1));
+            pushback(")");
         }
         else if(token.find('(') != string::npos || token.find(')') != string::npos){
             front = 0;
@@ -126,7 +127,7 @@ int alloc(){
 }
 
 int read(){
-    int root = NULL;
+    int root = 1;
     int temp = NULL;
     bool first = true;
     int tokenhashval = getHashValue(getNextToken());
@@ -135,11 +136,13 @@ int read(){
             if(first){
                 first = false;
                 temp = alloc();
+                memArray[temp].setfree(false);
                 root = temp;
             }
             else{
                 memArray[temp].setrchild(alloc());
                 temp = memArray[temp].getrchild();
+                memArray[temp].setfree(false);
             }
             
             if(tokenhashval==LEFTPAREN){
@@ -159,17 +162,32 @@ int read(){
     }
 }
 
+/*
 void memArrayPrint(int root){
     int lchild = memArray[root].getlchild();
     int rchild = memArray[root].getrchild();
-    cout << "[Node #" << root << "] ";
-    cout << "Left child : " << lchild << ", ";
-    cout << "Right child : " << rchild << endl;
-    if(lchild > 0){
+    bool free = memArray[root].getfree();
+    if(!free){
+        cout << "[Node #" << root << "] ";
+        cout << "Left child : " << lchild << ", ";
+        cout << "Right child : " << rchild << endl;
+    }
+    if(lchild > 0 && !free){
         memArrayPrint(lchild);
     }
-    if(rchild > 0){
+    if(rchild > 0 && !free){
         memArrayPrint(rchild);
+    }
+}
+ */
+
+void memArrayPrint(int root){
+    for(int i = 1 ; i < 31 ; i++){
+        cout << "[Node #" << i << "] ";
+        cout << "Left child : " << memArray[i].getlchild() << ", ";
+        cout << "Right child : " << memArray[i].getrchild() << ", ";
+        if(memArray[i].getfree()) cout << "FREE" << endl;
+        else cout << "ALLOCATED" << endl;
     }
 }
 
@@ -209,10 +227,12 @@ void printSymbol(string data){
 }
 
 void dealloc(int root){
+    if(memArray[root].getfree()) return;
     memArray[root].setfree(true);
     int lchild = memArray[root].getlchild();
     int rchild = memArray[root].getrchild();
-    memArray[root].setrchild(freeroot);
+    memArray[root].setrchild(freeroot);  // add the node to frontmost position of free list
+    memArray[root].setlchild(0);  // simply to initialize lchild to 0
     freeroot = root;
     if(lchild > 0) dealloc(lchild);
     if(rchild > 0) dealloc(rchild);

@@ -16,15 +16,22 @@ symbol symbolTable[hashtablesize];
 // vector<string> tokens;
 string tokens[31];
 int current = -1;
+int token_current = 0;
 #include "operation.hpp"
 
 int main(int argc, const char * argv[]) {
+    
+    cout << "          DS Scheme Project 1" << endl;
+    cout << "        2016-18829 Seongmin Lee" << endl;
+    cout << "You can exit the program by typing \"exit\" " << endl;
+    cout << endl;
     
     initialize();
     
     string data; // input string
     
     while(true){
+        token_current = 0;
         cout << ">";
         getline(cin, data);
         if(data.compare("exit") == 0) break;
