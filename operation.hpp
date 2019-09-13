@@ -17,6 +17,7 @@
 
 void initialize();
 int getHashValue(string s);
+void clear();
 void tokenizer(string data);
 string getNextToken();
 int alloc();

@@ -7,19 +7,22 @@
 //
 
 #include "operation.hpp"
-#include <vector>
+// #include <vector>
 #include <sstream>
 #include <string>
 #include <iostream>
 using namespace std;
 
-extern node memArray[30];
-extern symbol symbolTable[3000];
-extern vector<string> tokens;
-extern int current;
+extern const int hashtablesize = 3000;
+extern node memArray[31];
+extern symbol symbolTable[hashtablesize];
+// extern vector<string> tokens;
+extern string tokens[31];
+extern int current;  // deal with token index while building parse tree
 const char LEFTPAREN = '(';
 const char RIGHTPAREN = ')';
 
+int token_current = 0;  // to pushback into tokens array
 int freeroot = 1;
 
 void initialize(){
@@ -40,8 +43,14 @@ void initialize(){
 int getHashValue(string s){
     int hashval = 0;
     for(int i = 0; i<s.length(); i++){
+        // Change uppercase to lowercase
+        if(s[i]>=65 && s[i]<=90){
+            tokens[current][i] += 32;
+            s[i] += 32;
+        }
         hashval += s[i];
     }
+    hashval = hashval % hashtablesize;
     // cout << "hash value is : " << hashval << endl;
     while(!symbolTable[hashval].getavail() && s.compare(symbolTable[hashval].getsymbol())!=0){
         hashval ++;
@@ -53,12 +62,23 @@ int getHashValue(string s){
     return hashval;
 }
 
+void pushback(string s){
+    tokens[token_current++] = s;
+}
+
+void clear(){
+    for(int i = 0 ; i < 31; i++){
+        tokens[i] = "";
+    }
+}
+
+
 void rightparentokenizer(string data){
     if(data[data.size()-1] == ')'){
         rightparentokenizer(data.substr(0, data.size()-1));
-        tokens.push_back(")");
+        pushback(")");
     }
-    else tokens.push_back(data);
+    else pushback(data);
 }
 
 void tokenizer(string data){ // Tokenize input string
@@ -67,10 +87,11 @@ void tokenizer(string data){ // Tokenize input string
     
     int front = 0;
     current = -1;
+    token_current = 0;
     while(ss >> token){
         if(token[0] == '('){ // Tokenize left parenthesis
-            tokens.push_back("(");
-            tokens.push_back(token.substr(1));
+            pushback("(");
+            pushback(token.substr(1));
         }
         else if(token[token.size()-1] == ')'){ // Tokenize right parenthesis
             rightparentokenizer(token);
@@ -79,15 +100,15 @@ void tokenizer(string data){ // Tokenize input string
             front = 0;
             for(int i = 0 ; i < token.size() ; i++){
                 if(token[i] != '(' && token[i] != ')') continue;
-                if(i > front) tokens.push_back(token.substr(front, i-front));
+                if(i > front) pushback(token.substr(front, i-front));
                 front = i+1;
-                if(token[i] == '(') tokens.push_back("(");
-                else if(token[i] == ')') tokens.push_back(")");
+                if(token[i] == '(') pushback("(");
+                else if(token[i] == ')') pushback(")");
             }
-            if(front != token.size()) tokens.push_back(token.substr(front, token.size()-front));
+            if(front != token.size()) pushback(token.substr(front, token.size()-front));
         }
         else{
-            tokens.push_back(token);
+            pushback(token);
         }
     }
 }
@@ -167,9 +188,9 @@ void print(int root, string data){
     cout << endl;
     symbolTablePrint();
     cout << endl;
-    for(int i = 0; i<tokens.size(); i++){
+    for(int i = 0; i<token_current; i++){
         if(tokens[i].compare("(")==0) cout << tokens[i];
-        else if(i+1 < tokens.size()){
+        else if(i+1 < token_current){
             if(tokens[i+1].compare(")")==0) cout << tokens[i];
             else cout << tokens[i] << " ";
         }
@@ -179,7 +200,7 @@ void print(int root, string data){
 }
 
 void printSymbol(string data){
-    for(int i=0 ; i<tokens.size(); i++){
+    for(int i=0 ; i<token_current; i++){
         getHashValue(tokens[i]);
         cout << "Input symbol : " << tokens[i] << endl;
     }

@@ -9,11 +9,13 @@
 #include <iostream>
 #include "node.hpp"
 #include "symbol.hpp"
-#include <vector>
-node memArray[31];
-symbol symbolTable[3000];
-vector<string> tokens;
-int current;
+// #include <vector>
+const int hashtablesize = 3000;
+node memArray[31];  // Have size 31 in order to start with index 1 not 0
+symbol symbolTable[hashtablesize];
+// vector<string> tokens;
+string tokens[31];
+int current = -1;
 #include "operation.hpp"
 
 int main(int argc, const char * argv[]) {
@@ -29,14 +31,14 @@ int main(int argc, const char * argv[]) {
         tokenizer(data);
         if(tokens[0].compare("(") != 0){
             printSymbol(data);
-            tokens.clear();
+            clear();
             continue;
         }
         int root = read();
         cout << "]";
         print(root, data);
         dealloc(root);
-        tokens.clear();
+        clear();
     }
     return 0;
 }
