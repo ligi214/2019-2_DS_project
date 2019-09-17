@@ -32,6 +32,7 @@ void initialize(){
         memArray[i].setrchild(i+1);
         memArray[i].setlchild(NULL);
     }
+    memArray[30].setrchild(0);  // Point to NULL in freelist
     for(int i=0;i<3000;i++){
         symbolTable[i].setlink(NULL);
         symbolTable[i].setsymbol("");
@@ -49,9 +50,9 @@ int getHashValue(string s){
             tokens[current][i] += 32;
             s[i] += 32;
         }
-        hashval += s[i];
+        hashval = hashval * 128 + s[i];
+        hashval = hashval % hashtablesize;
     }
-    hashval = hashval % hashtablesize;
     // cout << "hash value is : " << hashval << endl;
     while(!symbolTable[hashval].getavail() && s.compare(symbolTable[hashval].getsymbol())!=0){
         hashval ++;
@@ -189,6 +190,7 @@ void memArrayPrint(int root){
         if(memArray[i].getfree()) cout << "FREE" << endl;
         else cout << "ALLOCATED" << endl;
     }
+    cout << endl;
 }
 
 void symbolTablePrint(){
@@ -197,15 +199,20 @@ void symbolTablePrint(){
             cout << "Symbol Table #" << i << " : " << symbolTable[i].getsymbol() << endl;
         }
     }
+    cout << endl;
 }
 
 void print(int root, string data){
     cout << "Free list's root node index : " << freeroot << endl;
     cout << "Memory Array's root node index : " << root << endl << endl;
     memArrayPrint(root);
-    cout << endl;
     symbolTablePrint();
-    cout << endl;
+    
+    if(token_current==2 && tokens[0].compare("(")==0 && tokens[1].compare(")")==0){
+        cout << "NULL" << endl << endl;
+        return;
+    }
+    
     for(int i = 0; i<token_current; i++){
         if(tokens[i].compare("(")==0) cout << tokens[i];
         else if(i+1 < token_current){
@@ -218,11 +225,15 @@ void print(int root, string data){
 }
 
 void printSymbol(string data){
+    int hashvalue = 0;
     for(int i=0 ; i<token_current; i++){
-        getHashValue(tokens[i]);
-        cout << "Input symbol : " << tokens[i] << endl;
+        hashvalue = getHashValue(tokens[i]);
+        cout << "Input symbol : " << tokens[i] << ", Hash value : " << hashvalue << "(" << -hashvalue << " in negative)" << endl;
     }
     cout << endl;
+    cout << "Free list's root node index : " << freeroot << endl;
+    cout << "Does not occupy any space in Memory Array (No root defined)" << endl << endl;
+    memArrayPrint(0);
     symbolTablePrint();
 }
 
