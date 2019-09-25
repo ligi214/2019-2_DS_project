@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
     
     cout << "          DS Scheme Project 1" << endl;
     cout << "        2016-18829 Seongmin Lee" << endl;
-    cout << "You can exit the program by typing \"exit\" " << endl;
+    // cout << "You can exit the program by typing \"exit\" " << endl;
     cout << endl;
     
     initialize();
@@ -34,7 +34,7 @@ int main(int argc, const char * argv[]) {
         token_current = 0;
         cout << ">";
         getline(cin, data);
-        if(data.compare("exit") == 0) break;
+        // if(data.compare("exit") == 0) break;
         tokenizer(data);
         if(tokens[0].compare("(") != 0){
             printSymbol(data);

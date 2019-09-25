@@ -7,7 +7,6 @@
 //
 
 #include "operation.hpp"
-// #include <vector>
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -16,7 +15,6 @@ using namespace std;
 extern const int hashtablesize = 3000;
 extern node memArray[31];
 extern symbol symbolTable[hashtablesize];
-// extern vector<string> tokens;
 extern string tokens[31];
 extern int current;  // deal with token index while building parse tree
 const char LEFTPAREN = '(';
@@ -53,7 +51,6 @@ int getHashValue(string s){
         hashval = hashval * 128 + s[i];
         hashval = hashval % hashtablesize;
     }
-    // cout << "hash value is : " << hashval << endl;
     while(!symbolTable[hashval].getavail() && s.compare(symbolTable[hashval].getsymbol())!=0){
         hashval ++;
     }
@@ -73,15 +70,7 @@ void clear(){
         tokens[i] = "";
     }
 }
-/*
-void rightparentokenizer(string data){
-    if(data[data.size()-1] == ')'){
-        rightparentokenizer(data.substr(0, data.size()-1));
-        pushback(")");
-    }
-    else tokenizer(data);
-}
-*/
+
 void tokenizer(string data){ // Tokenize input string
     string token;
     stringstream ss(data);
@@ -91,10 +80,8 @@ void tokenizer(string data){ // Tokenize input string
         if(token[0] == '('){ // Tokenize left parenthesis
             pushback("(");
             tokenizer(token.substr(1));
-            // pushback(token.substr(1));
         }
         else if(token[token.size()-1] == ')'){ // Tokenize right parenthesis
-            // rightparentokenizer(token);
             tokenizer(token.substr(0, token.size()-1));
             pushback(")");
         }
@@ -162,25 +149,6 @@ int read(){
         return tokenhashval * (-1);
     }
 }
-
-/*
-void memArrayPrint(int root){
-    int lchild = memArray[root].getlchild();
-    int rchild = memArray[root].getrchild();
-    bool free = memArray[root].getfree();
-    if(!free){
-        cout << "[Node #" << root << "] ";
-        cout << "Left child : " << lchild << ", ";
-        cout << "Right child : " << rchild << endl;
-    }
-    if(lchild > 0 && !free){
-        memArrayPrint(lchild);
-    }
-    if(rchild > 0 && !free){
-        memArrayPrint(rchild);
-    }
-}
- */
 
 void memArrayPrint(int root){
     for(int i = 1 ; i < 31 ; i++){
