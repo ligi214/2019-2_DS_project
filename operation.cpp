@@ -8,37 +8,45 @@
 
 #include "operation.hpp"
 #include <sstream>
-#include <string>
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 extern const int hashtablesize = 3000;
-extern node memArray[31];
+extern const int memArraySize = 30;
+extern const int tokensSize = 30;
+extern node memArray[memArraySize+1];
 extern symbol symbolTable[hashtablesize];
-extern string tokens[31];
+extern string tokens[tokensSize+1];
 extern int current;  // deal with token index while building parse tree
-const char LEFTPAREN = '(';
-const char RIGHTPAREN = ')';
-
 extern int token_current;  // to pushback into tokens array
 int freeroot = 1;
 
-void initialize(){
-    token_current = 0;
-    for(int i=0;i<31;i++){
-        memArray[i].setfree(true);
-        memArray[i].setrchild(i+1);
-        memArray[i].setlchild(NULL);
+int getHashValue_keyword(string s){
+    int hashval = 0;
+    for(int i = 0; i<s.length(); i++){
+        // Change uppercase to lowercase
+        if(s[i]>=65 && s[i]<=90){
+            tokens[current][i] += 32;
+            s[i] += 32;
+        }
+        hashval = hashval * 128 + s[i];
+        hashval = hashval % hashtablesize;
     }
-    memArray[30].setrchild(0);  // Point to NULL in freelist
-    for(int i=0;i<3000;i++){
-        symbolTable[i].setlink(NULL);
-        symbolTable[i].setsymbol("");
-        symbolTable[i].setavail(true);
-    }
-    symbolTable[LEFTPAREN].setsymbol("(");
-    symbolTable[RIGHTPAREN].setsymbol(")");
+    return hashval;
 }
+
+const int LEFTPAREN = getHashValue_keyword("(");
+const int RIGHTPAREN = getHashValue_keyword(")");
+const int PLUS = getHashValue_keyword("+");
+const int MINUS = getHashValue_keyword("-");
+const int TIMES = getHashValue_keyword("*");
+const int CAR = getHashValue_keyword("car");
+const int CDR = getHashValue_keyword("cdr");
+const int CONS = getHashValue_keyword("cons");
+const int DEFINE = getHashValue_keyword("define");
+const int LAMBDA = getHashValue_keyword("lambda");
+const int QUOTE = getHashValue_keyword("quote");
 
 int getHashValue(string s){
     int hashval = 0;
@@ -61,14 +69,72 @@ int getHashValue(string s){
     return hashval;
 }
 
+void initialize(){
+    token_current = 0;
+    for(int i=0;i<=memArraySize;i++){
+        memArray[i].setfree(true);
+        memArray[i].setrchild(i+1);
+        memArray[i].setlchild(NULL);
+    }
+    memArray[memArraySize].setrchild(0);  // Point to NULL in freelist
+    for(int i=0;i<3000;i++){
+        symbolTable[i].setlink(NULL);
+        symbolTable[i].setsymbol("");
+        symbolTable[i].setavail(true);
+    }
+    getHashValue("(");
+    getHashValue(")");
+    getHashValue("+");
+    getHashValue("-");
+    getHashValue("*");
+    getHashValue("car");
+    getHashValue("cdr");
+    getHashValue("cons");
+    getHashValue("define");
+    getHashValue("lambda");
+    getHashValue("quote");
+}
+
 void pushback(string s){
     tokens[token_current++] = s;
 }
 
-void clear(){
-    for(int i = 0 ; i < 31; i++){
+void clearTokens(){
+    token_current = 0;
+    for(int i = 0 ; i <= tokensSize; i++){
         tokens[i] = "";
     }
+}
+
+string preprocessing(){
+    string newcommand = "";
+    string token;
+    int num_of_left_paren = 0;
+    // Have used redundant white spaces since those blanks will be eventually ignored by tokenizer
+    while(((token=getNextToken()).compare(""))!=0){
+        if(token.compare("define")==0){
+            newcommand = newcommand + "define ";
+            token = getNextToken();
+            if(token.compare("(")==0){  // define function
+                token = getNextToken();
+                newcommand = newcommand + token + "(lambda(" + preprocessing() + ")";
+            }
+            else newcommand = newcommand + token + " ";
+        }
+        else if(token.compare("'")==0){
+            newcommand = newcommand + "(quote ";
+            num_of_left_paren = 0;
+            do {
+                token = getNextToken();
+                newcommand = newcommand + token + " ";
+                if(token.compare("(")==0) num_of_left_paren++;
+                else if(token.compare(")")==0) num_of_left_paren--;
+            } while (num_of_left_paren>0);
+            newcommand = newcommand + ")";
+        }
+        else newcommand = newcommand + token + " ";
+    }
+    return newcommand;
 }
 
 void tokenizer(string data){ // Tokenize input string
@@ -79,6 +145,10 @@ void tokenizer(string data){ // Tokenize input string
     while(ss >> token){
         if(token[0] == '('){ // Tokenize left parenthesis
             pushback("(");
+            tokenizer(token.substr(1));
+        }
+        else if(token[0] == '\''){ // Tokenize quotation
+            pushback("'");
             tokenizer(token.substr(1));
         }
         else if(token[token.size()-1] == ')'){ // Tokenize right parenthesis
@@ -150,8 +220,23 @@ int read(){
     }
 }
 
-void memArrayPrint(int root){
-    for(int i = 1 ; i < 31 ; i++){
+void memArrayPrint_alloc_only_from_root(int root){
+    if(root==0) return;
+    if(memArray[root].getfree()) return;
+    int lchild = memArray[root].getlchild();
+    int rchild = memArray[root].getrchild();
+    cout << "[Node #" << root << "] ";
+    cout << "Left child : " << lchild << ", ";
+    cout << "Right child : " << rchild << ", ";
+    if(memArray[root].getfree()) cout << "FREE" << endl;
+    else cout << "ALLOCATED" << endl;
+    if(lchild > 0) memArrayPrint_alloc_only_from_root(lchild);
+    if(rchild > 0) memArrayPrint_alloc_only_from_root(rchild);
+}
+
+void memArrayPrint_alloc_only(int root){
+    for(int i = 1 ; i <= memArraySize ; i++){
+        if(memArray[i].getfree()) continue;
         cout << "[Node #" << i << "] ";
         cout << "Left child : " << memArray[i].getlchild() << ", ";
         cout << "Right child : " << memArray[i].getrchild() << ", ";
@@ -161,10 +246,36 @@ void memArrayPrint(int root){
     cout << endl;
 }
 
+void memArrayPrint(int root){
+    string s = "";
+    cout.flags(ios::left);
+    for(int i = 1 ; i <= memArraySize ; i++){
+        cout << "[Node #";
+        if(i<10) cout << "0" << i << "] ";
+        else cout << i << "] ";
+        s = "Left child : " + to_string(memArray[i].getlchild()) + ", ";
+        cout.width(20);
+        cout << s;
+        cout.width(20);
+        s = "Right child : " + to_string(memArray[i].getrchild()) + ", ";
+        cout << s;
+        if(memArray[i].getfree()) cout << "FREE" << endl;
+        else cout << "ALLOCATED" << endl;
+    }
+    cout << endl;
+}
+
 void symbolTablePrint(){
+    string s = "";
     for(int i=0;i<3000;i++){
         if(symbolTable[i].getavail() == false){
-            cout << "Symbol Table #" << i << " : " << symbolTable[i].getsymbol() << endl;
+            s = "Symbol Table #" + to_string(i) + " : " + symbolTable[i].getsymbol();
+            cout.flags(ios::left);
+            cout.width(30);
+            cout << s;
+            cout << "\t\t";
+            s = "Pointing : " + to_string(symbolTable[i].getlink());
+            cout << s << endl;
         }
     }
     cout << endl;

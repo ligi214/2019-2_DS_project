@@ -11,13 +11,15 @@
 #include "symbol.hpp"
 // #include <vector>
 const int hashtablesize = 3000;
-node memArray[31];  // Have size 31 in order to start with index 1 not 0
+const int memArraySize = 30;
+const int tokensSize = 30;
+node memArray[memArraySize+1];  // Have size 31 in order to start with index 1 not 0
 symbol symbolTable[hashtablesize];
-// vector<string> tokens;
-string tokens[31];
+string tokens[tokensSize+1];
 int current = -1;
 int token_current = 0;
 #include "operation.hpp"
+#include "evaluation.hpp"
 
 int main(int argc, const char * argv[]) {
     
@@ -36,16 +38,32 @@ int main(int argc, const char * argv[]) {
         getline(cin, data);
         // if(data.compare("exit") == 0) break;
         tokenizer(data);
+        data = preprocessing();
+        clearTokens();
+        cout << data << endl;
+        tokenizer(data);
         if(tokens[0].compare("(") != 0){
             printSymbol(data);
-            clear();
+            clearTokens();
             continue;
         }
         int root = read();
         cout << "]";
+        int ansHashVal = eval(root);
+        if(ansHashVal > 0){
+            // evaluation value is a node of memArray
+            cout << "Evaluation value is a node of memArray as below :" << endl;
+            memArrayPrint_alloc_only_from_root(ansHashVal);
+        }
+        else if(ansHashVal < 0){
+            // evaluation value is symbol in symbolTable
+            cout << "Evaluation value is a single value : ";
+            cout << symbolTable[ansHashVal*(-1)].getsymbol() << endl;
+        }
+        else cout << "No evaluation value(Define etc.) or Error case" << endl;
+        cout << endl;
         print(root, data);
-        dealloc(root);
-        clear();
+        clearTokens();
     }
     return 0;
 }
