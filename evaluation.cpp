@@ -14,7 +14,7 @@
 using namespace std;
 
 const int hashtablesize = 3000;
-const int memArraySize = 100;
+const int memArraySize = 30;
 extern node memArray[memArraySize+1];
 extern symbol symbolTable[hashtablesize];
 

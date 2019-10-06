@@ -13,7 +13,7 @@
 using namespace std;
 
 extern const int hashtablesize = 3000;
-extern const int memArraySize = 100;
+extern const int memArraySize = 30;
 extern const int tokensSize = 50;
 extern node memArray[memArraySize+1];
 extern symbol symbolTable[hashtablesize];

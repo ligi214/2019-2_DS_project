@@ -11,7 +11,7 @@
 #include "symbol.hpp"
 
 const int hashtablesize = 3000;
-const int memArraySize = 100;
+const int memArraySize = 30;
 const int tokensSize = 50;
 node memArray[memArraySize+1];  // Have size 31 in order to start with index 1 not 0
 symbol symbolTable[hashtablesize];
