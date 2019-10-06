@@ -13,8 +13,8 @@
 using namespace std;
 
 extern const int hashtablesize = 3000;
-extern const int memArraySize = 30;
-extern const int tokensSize = 30;
+extern const int memArraySize = 100;
+extern const int tokensSize = 50;
 extern node memArray[memArraySize+1];
 extern symbol symbolTable[hashtablesize];
 extern string tokens[tokensSize+1];
@@ -41,12 +41,20 @@ const int RIGHTPAREN = getHashValue_keyword(")");
 const int PLUS = getHashValue_keyword("+");
 const int MINUS = getHashValue_keyword("-");
 const int TIMES = getHashValue_keyword("*");
+const int isNUMBER = getHashValue_keyword("number?");
+const int isSYMBOL = getHashValue_keyword("symbol?");
+const int isNULL = getHashValue_keyword("null?");
+const int CONS = getHashValue_keyword("cons");
+const int COND = getHashValue_keyword("cond");
+const int ELSE = getHashValue_keyword("else");
 const int CAR = getHashValue_keyword("car");
 const int CDR = getHashValue_keyword("cdr");
-const int CONS = getHashValue_keyword("cons");
 const int DEFINE = getHashValue_keyword("define");
 const int LAMBDA = getHashValue_keyword("lambda");
 const int QUOTE = getHashValue_keyword("quote");
+const int SCHEME_TRUE = getHashValue_keyword("#t");
+const int SCHEME_FALSE = getHashValue_keyword("#f");
+const int NIL = getHashValue_keyword("()");
 
 int getHashValue(string s){
     int hashval = 0;
@@ -71,28 +79,38 @@ int getHashValue(string s){
 
 void initialize(){
     token_current = 0;
+    current = -1;
     for(int i=0;i<=memArraySize;i++){
         memArray[i].setfree(true);
         memArray[i].setrchild(i+1);
-        memArray[i].setlchild(NULL);
+        memArray[i].setlchild(0);
     }
     memArray[memArraySize].setrchild(0);  // Point to NULL in freelist
     for(int i=0;i<3000;i++){
-        symbolTable[i].setlink(NULL);
+        symbolTable[i].setlink(0);
         symbolTable[i].setsymbol("");
         symbolTable[i].setavail(true);
+        symbolTable[i].setlinked(false);
     }
     getHashValue("(");
     getHashValue(")");
     getHashValue("+");
     getHashValue("-");
     getHashValue("*");
+    getHashValue("number?");
+    getHashValue("symbol?");
+    getHashValue("null?");
+    getHashValue("cons");
+    getHashValue("cond");
+    getHashValue("else");
     getHashValue("car");
     getHashValue("cdr");
-    getHashValue("cons");
     getHashValue("define");
     getHashValue("lambda");
     getHashValue("quote");
+    getHashValue("#t");
+    getHashValue("#f");
+    getHashValue("()");
 }
 
 void pushback(string s){
@@ -121,7 +139,7 @@ string preprocessing(){
             }
             else newcommand = newcommand + token + " ";
         }
-        else if(token.compare("'")==0){
+        else if(token.compare("'")==0 || token.compare("`")==0){
             newcommand = newcommand + "(quote ";
             num_of_left_paren = 0;
             do {
@@ -149,6 +167,10 @@ void tokenizer(string data){ // Tokenize input string
         }
         else if(token[0] == '\''){ // Tokenize quotation
             pushback("'");
+            tokenizer(token.substr(1));
+        }
+        else if(token[0] == '`'){ // Tokenize quotation
+            pushback("`");
             tokenizer(token.substr(1));
         }
         else if(token[token.size()-1] == ')'){ // Tokenize right parenthesis
@@ -185,8 +207,8 @@ int alloc(){
 }
 
 int read(){
-    int root = 1;
-    int temp = NULL;
+    int root = 0;
+    int temp = 0;
     bool first = true;
     int tokenhashval = getHashValue(getNextToken());
     if(tokenhashval==LEFTPAREN){
@@ -206,18 +228,16 @@ int read(){
             if(tokenhashval==LEFTPAREN){
                 current--;
                 memArray[temp].setlchild(read());
-                memArray[temp].setrchild(NULL);
+                memArray[temp].setrchild(0);
             }
             else{
                 memArray[temp].setlchild(tokenhashval * (-1));
-                memArray[temp].setrchild(NULL);
+                memArray[temp].setrchild(0);
             }
         }
         return root;
     }
-    else{
-        return tokenhashval * (-1);
-    }
+    else return tokenhashval * (-1);
 }
 
 void memArrayPrint_alloc_only_from_root(int root){
@@ -281,33 +301,51 @@ void symbolTablePrint(){
     cout << endl;
 }
 
-void print(int root, string data){
-    cout << "Free list's root node index : " << freeroot << endl;
-    cout << "Memory Array's root node index : " << root << endl << endl;
-    memArrayPrint(root);
-    symbolTablePrint();
-    
-    if(token_current==2 && tokens[0].compare("(")==0 && tokens[1].compare(")")==0){
-        cout << "NULL" << endl << endl;
-        return;
+void print(int root, bool first){
+    // cout << "Free list's root node index : " << freeroot << endl;
+    // cout << "root : " << root << endl;
+    // memArrayPrint(root);
+    // symbolTablePrint();
+    if(root==0){
+        // cout << "Memory Array's root node index : " << root << endl << endl;
+        cout << "()";
     }
-    
-    for(int i = 0; i<token_current; i++){
-        if(tokens[i].compare("(")==0) cout << tokens[i];
-        else if(i+1 < token_current){
-            if(tokens[i+1].compare(")")==0) cout << tokens[i];
-            else cout << tokens[i] << " ";
-        }
-        else cout << tokens[i] << " ";
+    else if(root<0 && !symbolTable[-root].getlinked()){
+        cout << symbolTable[-root].getsymbol() << " ";
     }
-    cout << endl;
+    /*
+    else if(root<0 && (symbolTable[-root].getlink()==0 || symbolTable[-root].getlink()==-NIL)){
+        cout << "()";
+    }
+     */
+    else if(root<0){
+        cout << symbolTable[-root].getsymbol() << " ";
+    }
+    else{
+        // cout << "Memory Array's root node index : " << root << endl;
+        if(first) cout << "(";
+        print(memArray[root].getlchild(), true);
+        if(memArray[root].getrchild()!=0) print(memArray[root].getrchild(), false);
+        else cout << ")";
+    }
 }
-
+/*
 void printSymbol(string data){
     int hashvalue = 0;
+    current = 0;
     for(int i=0 ; i<token_current; i++){
         hashvalue = getHashValue(tokens[i]);
-        cout << "Input symbol : " << tokens[i] << ", Hash value : " << hashvalue << "(" << -hashvalue << " in negative)" << endl;
+        current++;
+        int link = symbolTable[hashvalue].getlink();
+        if(link==0){
+            cout << "Input symbol : " << tokens[i] << ", Hash value : " << hashvalue << "(" << -hashvalue << " in negative)" << endl;
+        }
+        else if(link<0){
+            cout << "Input symbol, " << tokens[i] << ", contains a value : " << symbolTable[-link].getsymbol() << endl;
+        }
+        else{
+            cout << "Input symbol, " << tokens[i] << ", contains a list : " << endl;
+        }
     }
     cout << endl;
     cout << "Free list's root node index : " << freeroot << endl;
@@ -315,6 +353,7 @@ void printSymbol(string data){
     memArrayPrint(0);
     symbolTablePrint();
 }
+ */
 
 void dealloc(int root){
     if(memArray[root].getfree()) return;

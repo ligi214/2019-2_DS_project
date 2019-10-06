@@ -24,7 +24,8 @@ string getNextToken();
 int alloc();
 int read();
 void memArrayPrint_alloc_only_from_root(int root);
-void print(int root, string data);
+void memArrayPrint(int root);
+void print(int root, bool first);
 void printSymbol(string data);
 void dealloc(int root);
 

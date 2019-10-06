@@ -10,13 +10,14 @@
 
 symbol::symbol(){
     sym = "";
-    link = NULL;
+    link = 0;
 }
 
 symbol::symbol(string s, int l){
     sym = s;
     link = l;
     avail = true;
+    linked = false;
 }
 
 void symbol::setsymbol(string s){
@@ -25,6 +26,7 @@ void symbol::setsymbol(string s){
 
 void symbol::setlink(int l){
     link = l;
+    linked = false;
 }
 
 void symbol::setavail(bool a){
@@ -35,10 +37,18 @@ string symbol::getsymbol(){
     return sym;
 }
 
+void symbol::setlinked(bool l){
+    linked = l;
+}
+
 int symbol::getlink(){
     return link;
 }
 
 bool symbol::getavail(){
     return avail;
+}
+
+bool symbol::getlinked(){
+    return linked;
 }

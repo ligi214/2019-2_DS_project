@@ -20,13 +20,16 @@ public:
     void setsymbol(string s);
     void setlink(int l);
     void setavail(bool a);
+    void setlinked(bool l);
     string getsymbol();
     int getlink();
     bool getavail();
+    bool getlinked();
 private:
     string sym;
     int link;
     bool avail;
+    bool linked;
 };
 
 #endif /* symbol_hpp */

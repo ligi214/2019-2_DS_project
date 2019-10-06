@@ -13,7 +13,8 @@
 #include "symbol.hpp"
 
 void push(symbol s);
-symbol pop();
+void pop();
+symbol top();
 int getSize();
 
 #endif /* stack_hpp */

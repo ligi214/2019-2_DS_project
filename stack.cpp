@@ -7,29 +7,35 @@
 //
 
 #include "stack.hpp"
-#define STACKSIZE 10
+#include <iostream>
+#define STACKSIZE 20
+using namespace std;
 
 symbol stack[STACKSIZE];
-int top=-1;
+int top_ptr=-1;
 int size=0;
 
 void push(symbol s){
-    if(++top >= STACKSIZE) return;
-    stack[top].setlink(s.getlink());
-    stack[top].setavail(s.getavail());
-    stack[top].setsymbol(s.getsymbol());
+    if(++top_ptr >= STACKSIZE) return;
+    stack[top_ptr].setlink(s.getlink());
+    stack[top_ptr].setavail(s.getavail());
+    stack[top_ptr].setsymbol(s.getsymbol());
+    stack[top_ptr].setlinked(s.getlinked());
     size++;
 }
 
-symbol pop(){
+void pop(){
     symbol s;
-    if(top < 0) return s;
-    s.setlink(stack[top].getlink());
-    s.setavail(stack[top].getavail());
-    s.setsymbol(stack[top].getsymbol());
-    top--;
+    if(top_ptr < 0){
+        cout << "The stack is now empty!" << endl;
+        return;
+    }
+    top_ptr--;
     size--;
-    return s;
+}
+
+symbol top(){
+    return stack[top_ptr];
 }
 
 int getSize(){
