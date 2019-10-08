@@ -14,7 +14,7 @@
 using namespace std;
 
 const int hashtablesize = 3000;
-const int memArraySize = 30;
+const int memArraySize = 1000;
 extern node memArray[memArraySize+1];
 extern symbol symbolTable[hashtablesize];
 
@@ -74,6 +74,8 @@ bool isNumber(int hashval){
     string s = symbolTable[hashval].getsymbol();
     for(int i=0;i<s.length();i++){
         if(s[i]>=48 && s[i]<=57) continue;
+        else if(s[0]==45) continue;
+        else if(s[0]==43) continue;
         else if(dot==0 && s[i]==46){
             dot++;
             continue;
@@ -92,8 +94,9 @@ int eval(int root){
      * return 0 if error case
      */
     if(root<0 && isNumber(root)) return root;
-    if(root<0 && !symbolTable[-root].getlinked()) return ERROR;
-    else if(root<0) return symbolTable[-root].getlink();
+    else if(root==-SCHEME_TRUE || root==-SCHEME_FALSE) return root;
+    else if(root<0 && !symbolTable[-root].getlinked()) return ERROR;
+    else if(root<0) return symbolTable[-root].getoriginallink();
     else if(root==0) return root;
     
     int token_index = -memArray[root].getlchild();
@@ -194,10 +197,13 @@ int eval(int root){
         int defContent = memArray[memArray[memArray[root].getrchild()].getrchild()].getlchild();
         if(isFunction(root)){
             symbolTable[defTermHashVal].setlink(defContent);
+            symbolTable[defTermHashVal].setoriginallink(defContent);
             symbolTable[defTermHashVal].setlinked(true);
         }
         else{
-            symbolTable[defTermHashVal].setlink(eval(defContent));
+            int temp = eval(defContent);
+            symbolTable[defTermHashVal].setlink(temp);
+            symbolTable[defTermHashVal].setoriginallink(temp);
             symbolTable[defTermHashVal].setlinked(true);
         }
         return NULL_RESULT;
@@ -231,6 +237,21 @@ int eval(int root){
                 newValNode = memArray[newValNode].getrchild();
             } while(varNode>0 && newValNode>0);
             
+            
+            varNode = memArray[memArray[lambdaNode].getrchild()].getlchild();
+            newValNode = memArray[root].getrchild();
+            do {
+                int funcVarHashVal = memArray[varNode].getlchild();
+                int newVal = eval(memArray[newValNode].getlchild());
+                if(funcVarHashVal != newVal){
+                    funcVarHashVal *= (-1);
+                    symbolTable[funcVarHashVal].setoriginallink(symbolTable[funcVarHashVal].getlink());
+                }
+                varNode = memArray[varNode].getrchild();
+                newValNode = memArray[newValNode].getrchild();
+            } while(varNode>0 && newValNode>0);
+            
+            
             int ans = eval(memArray[memArray[memArray[lambdaNode].getrchild()].getrchild()].getlchild());
             
             while(true){
@@ -241,6 +262,7 @@ int eval(int root){
                 stack_depth--;
                 int hashVal = getHashValue(s.getsymbol());
                 symbolTable[hashVal].setlink(s.getlink());
+                symbolTable[hashVal].setoriginallink(s.getoriginallink());
                 symbolTable[hashVal].setlinked(s.getlinked());
             }
             return ans;

@@ -16,6 +16,7 @@ symbol::symbol(){
 symbol::symbol(string s, int l){
     sym = s;
     link = l;
+    originallink = 0;
     avail = true;
     linked = false;
 }
@@ -27,6 +28,10 @@ void symbol::setsymbol(string s){
 void symbol::setlink(int l){
     link = l;
     linked = false;
+}
+
+void symbol::setoriginallink(int l){
+    originallink = l;
 }
 
 void symbol::setavail(bool a){
@@ -43,6 +48,10 @@ void symbol::setlinked(bool l){
 
 int symbol::getlink(){
     return link;
+}
+
+int symbol::getoriginallink(){
+    return originallink;
 }
 
 bool symbol::getavail(){

@@ -11,7 +11,7 @@
 #include "symbol.hpp"
 
 const int hashtablesize = 3000;
-const int memArraySize = 30;
+const int memArraySize = 1000;
 const int tokensSize = 50;
 node memArray[memArraySize+1];  // Have size 31 in order to start with index 1 not 0
 symbol symbolTable[hashtablesize];
@@ -55,29 +55,30 @@ int main(int argc, const char * argv[]) {
         // memArrayPrint(0);
         if(ansHashVal > 0){
             // evaluation value is a node of memArray
-            cout << "Evaluation value is a node of memArray as below :" << endl;
-            print(ansHashVal, true);
-            cout << " with node # " << ansHashVal;
+            // cout << "Evaluation value is a node of memArray as below :" << endl;
+            print(ansHashVal, true, true);
+            // cout << " with node # " << ansHashVal;
             cout << endl << endl;
         }
         else if(ansHashVal < -7000){
             cout << "Error case" << endl << endl;
         }
         else if(ansHashVal < -3500){
-            cout << "No evaluation value(Define/Single symbol/etc.)" << endl;
+            // cout << "No evaluation value(Define/Single symbol/etc.)" << endl;
             if(root<=0){
-                print(ansHashVal, true);
+                print(ansHashVal, true, true);
                 cout << endl << endl;
             }
-            else cout << endl;
+            else cout << endl <<endl;
         }
         else if(ansHashVal <= 0){
             // evaluation value is symbol in symbolTable
             // cout << "Evaluation value is a single value : ";
             // cout << symbolTable[ansHashVal*(-1)].getsymbol() << endl;
-            print(ansHashVal, true);
+            print(ansHashVal, true, true);
             cout << endl << endl;
         }
+        // symbolTablePrint();
         clearTokens();
     }
     return 0;

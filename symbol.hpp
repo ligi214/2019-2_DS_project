@@ -19,15 +19,18 @@ public:
     symbol(string s, int l);
     void setsymbol(string s);
     void setlink(int l);
+    void setoriginallink(int l);
     void setavail(bool a);
     void setlinked(bool l);
     string getsymbol();
     int getlink();
+    int getoriginallink();
     bool getavail();
     bool getlinked();
 private:
     string sym;
     int link;
+    int originallink;
     bool avail;
     bool linked;
 };

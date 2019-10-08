@@ -25,8 +25,9 @@ int alloc();
 int read();
 void memArrayPrint_alloc_only_from_root(int root);
 void memArrayPrint(int root);
-void print(int root, bool first);
+void print(int root, bool first, bool afterparenthesis);
 void printSymbol(string data);
 void dealloc(int root);
+void symbolTablePrint();
 
 #endif /* operation_hpp */

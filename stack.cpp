@@ -18,6 +18,7 @@ int size=0;
 void push(symbol s){
     if(++top_ptr >= STACKSIZE) return;
     stack[top_ptr].setlink(s.getlink());
+    stack[top_ptr].setoriginallink(s.getoriginallink());
     stack[top_ptr].setavail(s.getavail());
     stack[top_ptr].setsymbol(s.getsymbol());
     stack[top_ptr].setlinked(s.getlinked());

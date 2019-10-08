@@ -13,7 +13,7 @@
 using namespace std;
 
 extern const int hashtablesize = 3000;
-extern const int memArraySize = 30;
+extern const int memArraySize = 1000;
 extern const int tokensSize = 50;
 extern node memArray[memArraySize+1];
 extern symbol symbolTable[hashtablesize];
@@ -88,6 +88,7 @@ void initialize(){
     memArray[memArraySize].setrchild(0);  // Point to NULL in freelist
     for(int i=0;i<3000;i++){
         symbolTable[i].setlink(0);
+        symbolTable[i].setoriginallink(0);
         symbolTable[i].setsymbol("");
         symbolTable[i].setavail(true);
         symbolTable[i].setlinked(false);
@@ -201,6 +202,10 @@ string getNextToken(){
 
 int alloc(){
     int temp = freeroot;
+    if(temp<0 || temp>=memArraySize){
+        cout << "Have allocated all memory array spaces" << endl;
+        exit(0);
+    }
     freeroot = memArray[temp].getrchild();
     memArray[temp].setfree(false);
     return temp;
@@ -301,7 +306,7 @@ void symbolTablePrint(){
     cout << endl;
 }
 
-void print(int root, bool first){
+void print(int root, bool first, bool afterparenthesis){
     // cout << "Free list's root node index : " << freeroot << endl;
     // cout << "root : " << root << endl;
     // memArrayPrint(root);
@@ -310,22 +315,29 @@ void print(int root, bool first){
         // cout << "Memory Array's root node index : " << root << endl << endl;
         cout << "()";
     }
-    else if(root<0 && !symbolTable[-root].getlinked()){
-        cout << symbolTable[-root].getsymbol() << " ";
-    }
     /*
+    else if(root<0 && !symbolTable[-root].getlinked()){
+        if(first) cout << symbolTable[-root].getsymbol();
+        else cout << " " << symbolTable[-root].getsymbol();
+    }
+     
     else if(root<0 && (symbolTable[-root].getlink()==0 || symbolTable[-root].getlink()==-NIL)){
         cout << "()";
     }
      */
     else if(root<0){
-        cout << symbolTable[-root].getsymbol() << " ";
+        if(afterparenthesis) cout << symbolTable[-root].getsymbol();
+        else cout << " " << symbolTable[-root].getsymbol();
     }
     else{
         // cout << "Memory Array's root node index : " << root << endl;
-        if(first) cout << "(";
-        print(memArray[root].getlchild(), true);
-        if(memArray[root].getrchild()!=0) print(memArray[root].getrchild(), false);
+        if(first){
+            cout << "(";
+            print(memArray[root].getlchild(), true, true);
+        }
+        else print(memArray[root].getlchild(), true, false);
+        
+        if(memArray[root].getrchild()!=0) print(memArray[root].getrchild(), false, false);
         else cout << ")";
     }
 }
