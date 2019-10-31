@@ -15,12 +15,14 @@ node::node(){
     lchild = 0;
     rchild = 0;
     free = false;
+    flag = false;
 }
 
 node::node(int l, int r){
     lchild = l;
     rchild = r;
     free = false;
+    flag = false;
 }
 
 void node::setlchild(int l){
@@ -35,6 +37,10 @@ void node::setfree(bool f){
     free = f;
 }
 
+void node::setflag(bool f){
+    flag = f;
+}
+
 int node::getlchild(){
     return lchild;
 }
@@ -45,4 +51,8 @@ int node::getrchild(){
 
 bool node::getfree(){
     return free;
+}
+
+bool node::getflag(){
+    return flag;
 }

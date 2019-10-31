@@ -13,33 +13,33 @@
 #include <string>
 using namespace std;
 
-const int hashtablesize = 3000;
-const int memArraySize = 1000;
-extern node memArray[memArraySize+1];
+const int hashtablesize = 1031;
+extern int memArraySize;
+extern node* memArray;
 extern symbol symbolTable[hashtablesize];
 
 extern int getHashValue_keyword(string s);
 extern int getHashValue(string s);
 
-const int LEFTPAREN = getHashValue_keyword("(");
-const int RIGHTPAREN = getHashValue_keyword(")");
-const int PLUS = getHashValue_keyword("+");
-const int MINUS = getHashValue_keyword("-");
-const int TIMES = getHashValue_keyword("*");
-const int isNUMBER = getHashValue_keyword("number?");
-const int isSYMBOL = getHashValue_keyword("symbol?");
-const int isNULL = getHashValue_keyword("null?");
-const int CONS = getHashValue_keyword("cons");
-const int COND = getHashValue_keyword("cond");
-const int ELSE = getHashValue_keyword("else");
-const int CAR = getHashValue_keyword("car");
-const int CDR = getHashValue_keyword("cdr");
-const int DEFINE = getHashValue_keyword("define");
-const int LAMBDA = getHashValue_keyword("lambda");
-const int QUOTE = getHashValue_keyword("quote");
-const int SCHEME_TRUE = getHashValue_keyword("#t");
-const int SCHEME_FALSE = getHashValue_keyword("#f");
-const int NIL = getHashValue_keyword("()");
+const int LEFTPAREN = 1;
+const int RIGHTPAREN = 2;
+const int SCHEME_TRUE = 3;
+const int SCHEME_FALSE = 4;
+const int PLUS = 5;
+const int MINUS = 6;
+const int TIMES = 7;
+const int isNUMBER = 8;
+const int isSYMBOL = 9;
+const int isNULL = 10;
+const int CONS = 11;
+const int COND = 12;
+const int ELSE = 13;
+const int CAR = 14;
+const int CDR = 15;
+const int DEFINE = 16;
+const int QUOTE = 17;
+const int LAMBDA = 18;
+
 const int ERROR = -10000;
 const int NULL_RESULT = -5000;
 
@@ -229,6 +229,7 @@ int eval(int root){
                     funcVarHashVal *= (-1);
                     // funcVarHashVal에 원래 들어있던 값이랑 이런 거 스택에다가 push
                     push(symbolTable[funcVarHashVal]);
+                    // if(symbolTable[funcVarHashVal].getlink()>0) flagNodes(symbolTable[funcVarHashVal].getlink());
                     symbolTable[funcVarHashVal].setlink(newVal);
                     symbolTable[funcVarHashVal].setlinked(true);
                     stack_depth++;
@@ -236,7 +237,6 @@ int eval(int root){
                 varNode = memArray[varNode].getrchild();
                 newValNode = memArray[newValNode].getrchild();
             } while(varNode>0 && newValNode>0);
-            
             
             varNode = memArray[memArray[lambdaNode].getrchild()].getlchild();
             newValNode = memArray[root].getrchild();
@@ -251,7 +251,6 @@ int eval(int root){
                 newValNode = memArray[newValNode].getrchild();
             } while(varNode>0 && newValNode>0);
             
-            
             int ans = eval(memArray[memArray[memArray[lambdaNode].getrchild()].getrchild()].getlchild());
             
             while(true){
@@ -264,6 +263,7 @@ int eval(int root){
                 symbolTable[hashVal].setlink(s.getlink());
                 symbolTable[hashVal].setoriginallink(s.getoriginallink());
                 symbolTable[hashVal].setlinked(s.getlinked());
+                // if(symbolTable[hashVal].getlink()>0) unflagNodes(symbolTable[hashVal].getlink());
             }
             return ans;
         }

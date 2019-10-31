@@ -10,10 +10,11 @@
 #include "node.hpp"
 #include "symbol.hpp"
 
-const int hashtablesize = 3000;
-const int memArraySize = 1000;
-const int tokensSize = 50;
-node memArray[memArraySize+1];  // Have size 31 in order to start with index 1 not 0
+const int hashtablesize = 1031;
+int memArraySize = 30;
+const int tokensSize = 200;
+const int ERROR = -10000;
+node* memArray = new node[memArraySize+1];  // Have size 31 in order to start with index 1 not 0
 symbol symbolTable[hashtablesize];
 string tokens[tokensSize+1];
 int current = -1;
@@ -31,6 +32,7 @@ int main(int argc, const char * argv[]) {
     initialize();
     
     string data; // input string
+    int root;
     
     while(true){
         token_current = 0;
@@ -40,6 +42,7 @@ int main(int argc, const char * argv[]) {
         data = preprocessing();
         clearTokens();
         // cout << data << endl;
+        token_current = 0;
         tokenizer(data);
         /*
         if(tokens[0].compare("(") != 0){
@@ -48,11 +51,32 @@ int main(int argc, const char * argv[]) {
             continue;
         }
          */
-        int root = read();
+        root = read();
+        if(root==ERROR){
+            cout << "Consumed all memarray spaces" << endl;
+            current = -1;
+            root = 0;
+            garbagecollector();
+            root = read();
+            if(root==ERROR){
+                cout << "No available space even with garbage collector" << endl;
+                exit(0);
+                /*
+                int old_memArraySize = memArraySize;
+                memArraySize *= 2;
+                node* new_memArray = new node[memArraySize+1];
+                copy(memArray, memArray+old_memArraySize+1, new_memArray);
+                delete [] memArray;
+                memArray = new_memArray;
+                garbagecollector();
+                new_memArray_initialize(old_memArraySize, memArraySize);
+                root = read();
+                 */
+            }
+        }
         // cout << root << endl;
         cout << "]";
         int ansHashVal = eval(root);
-        // memArrayPrint(0);
         if(ansHashVal > 0){
             // evaluation value is a node of memArray
             // cout << "Evaluation value is a node of memArray as below :" << endl;
@@ -78,7 +102,8 @@ int main(int argc, const char * argv[]) {
             print(ansHashVal, true, true);
             cout << endl << endl;
         }
-        // symbolTablePrint();
+        memArrayPrint(root);
+        symbolTablePrint();
         clearTokens();
     }
     return 0;

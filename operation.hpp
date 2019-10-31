@@ -29,5 +29,9 @@ void print(int root, bool first, bool afterparenthesis);
 void printSymbol(string data);
 void dealloc(int root);
 void symbolTablePrint();
+void garbagecollector();
+void new_memArray_initialize(int old_memArraySize, int new_memArraySize);
+void flagNodes(int root);
+void unflagNodes(int root);
 
 #endif /* operation_hpp */
