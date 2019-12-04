@@ -10,6 +10,7 @@ using namespace std;
 
 Adj_Node** directed_adj_list = NULL;
 Adj_Node** undirected_adj_list = NULL;
+int** weights = NULL;
 
 int main(){
 	int x;
@@ -24,9 +25,18 @@ int main(){
 
 	directed_adj_list = new Adj_Node* [v_num];
 	undirected_adj_list = new Adj_Node* [v_num];
+	weights = new int*[v_num];
 	for(int i=0;i<v_num;i++){
 		directed_adj_list[i]=NULL;
 		undirected_adj_list[i]=NULL;
+		weights[i] = new int[v_num];
+	}
+
+	for(int i=0;i<v_num;i++){
+		for(int j=0;j<v_num;j++){
+			if(i!=j) weights[i][j] = INF;
+			else weights[i][j] = 0;
+		}
 	}
 
 	int w, u, v;
@@ -40,6 +50,8 @@ int main(){
 		u = stoi(line);
 		getline(inFile, line, '\n');
 		v = stoi(line);
+
+		weights[u][v] = w;
 
 		Adj_Node* new_node = new Adj_Node;
 		new_node->vertex = v;
@@ -61,24 +73,71 @@ int main(){
 
 		edge++;
 	}
-	if(edge!=e_num) cout << "error: edge number does not match" << endl;
+	if(edge!=e_num){
+		cout << "error: edge number does not match" << endl;
+		exit(1);
+	}
+	
+	int question_num;
+	while(1){
+		cout << "Select question number that you want to look up the answer" << endl;
+		cout << "1. Depth First Search" << endl;
+		cout << "2. Breadth First Search" << endl;
+		cout << "3. Minimum Spanning Tree" << endl;
+		cout << "4. Single Source Shortest Path" << endl;
+		cout << "5. Exit from the program (not given question)" << endl;
+		cout << "Input : ";
+		cin >> question_num;
+		cout << endl;
 
-	// 1. Input adjacency list is directed
-	cout << "======================================" << endl;
-	cout << " First case : Given graph is directed " << endl;
-	cout << "======================================" << endl;
-	// Q1. DFS Algorithm
-	dfs(directed_adj_list, v_num, e_num);
-	// Q2. BFS Algorithm
-	bfs(directed_adj_list, v_num, e_num);
+		switch(question_num)
+		{
+			case 1:
+				// Q1. DFS Algorithm
+				cout << "Question #1. Depth First Search algorithm" << endl;
+				cout << "======================================" << endl;
+				cout << " First case : Given graph is directed " << endl;
+				cout << "======================================" << endl;
+				dfs(directed_adj_list, v_num, e_num);
+				
+				cout <<  "=======================================" << endl;
+				cout << "Second case : Given graph is undirected" << endl;
+				cout << "=======================================" << endl;
+				dfs(undirected_adj_list, v_num, e_num);
+				break;
 
-	// 2. Input adjacency list is undirected
-	cout << endl << endl << "=======================================" << endl;
-	cout << "Second case : Given graph is undirected" << endl;
-	cout << "=======================================" << endl;
-	dfs(undirected_adj_list, v_num, e_num);
-	bfs(undirected_adj_list, v_num, e_num);
-	prim(undirected_adj_list, v_num, e_num);
+			case 2:
+				cout << "Question #2. Breadth First Search algorithm" << endl;
+				cout << "======================================" << endl;
+				cout << " First case : Given graph is directed " << endl;
+				cout << "======================================" << endl;
+				bfs(directed_adj_list, v_num, e_num);
+				
+				cout << "=======================================" << endl;
+				cout << "Second case : Given graph is undirected" << endl;
+				cout << "=======================================" << endl;
+				bfs(undirected_adj_list, v_num, e_num);
+				break;
+
+			case 3:
+				cout << "Question #3. Minimum Spanning Tree algorithm" << endl;
+				prim(undirected_adj_list, v_num, e_num);
+				break;
+
+			case 4:
+				// Q4. Dijkstra Algorithm (Shortest path)
+				cout << "Question #4. Single Source Shortest Path algorithm" << endl;
+				dijkstra(weights, v_num, e_num, 0);
+				break;
+
+			case 5:
+				exit(1);
+
+			default:
+				cout << "Wrong Question Number" << endl << endl;
+		}
+	}
+
 
 	return 0;	
 }

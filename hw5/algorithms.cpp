@@ -8,7 +8,6 @@ using namespace std;
 #define	GRAY	1
 #define BLACK	2
 
-#define INF		300000000
 
 int dfs_time = 0;
 
@@ -44,7 +43,6 @@ void dfs_visualize(DFS_Node** vertices, int v_num){
 }
 
 void dfs(Adj_Node** adj_list, int v_num, int e_num){
-	cout << "Question 1. Depth First Search algorithm" << endl;
 	DFS_Node** vertices = new DFS_Node*[v_num];
 	// Initialize vertices array
 	for(int i=0;i<v_num;i++){
@@ -63,8 +61,6 @@ void dfs(Adj_Node** adj_list, int v_num, int e_num){
 		}
 	}
 	dfs_time = 0;
-
-	cout << "===== DFS result is as below =====" << endl;
 	dfs_visualize(vertices, v_num);
 	cout << endl;
 }
@@ -104,7 +100,6 @@ void bfs_visualize(BFS_Node** vertices, int v_num){
 }
 
 void bfs(Adj_Node** adj_list, int v_num, int e_num){
-	cout << "Question 2. Breadth First Search algorithm" << endl;
 	BFS_Node** vertices = new BFS_Node*[v_num];
 	for(int i=0;i<v_num;i++){
 		vertices[i] = (BFS_Node*)(malloc(sizeof(BFS_Node)));
@@ -119,7 +114,6 @@ void bfs(Adj_Node** adj_list, int v_num, int e_num){
 			bfs_visit(adj_list, vertices, v_num, i);
 		}
 	}
-	cout << "===== BFS result is as below =====" << endl;
 	bfs_visualize(vertices, v_num);
 	cout << endl;
 }
@@ -141,7 +135,6 @@ void prim_visualize(MST_Node** vertices, int v_num){
 }
 
 void prim(Adj_Node** adj_list, int v_num, int e_num){
-	cout << "Question 3. Minimum Spanning tree using Prim's algorithm" << endl;
 	MST_Node** vertices = new MST_Node*[v_num];
 	for(int i=0;i<v_num;i++){
 		vertices[i] = (MST_Node*)(malloc(sizeof(MST_Node)));
@@ -149,35 +142,98 @@ void prim(Adj_Node** adj_list, int v_num, int e_num){
 		vertices[i]->key = INF;
 		vertices[i]->pred = NULL;
 	}
-
+	bool in_tv[v_num];
+	for(int i=0;i<v_num;i++){
+		in_tv[i] = false;
+	}
 	int selected = 0;
 	vertices[selected]->key = 0;
-	int i=1;
-	for(i=1;i<v_num;i++){
-		Adj_Node* v = adj_list[selected];
+
+	int i;
+	for(i=0;i<v_num;i++){
 		int min_vertex;
 		int min_value = INF;
+		for(int j=0;j<v_num;j++){
+			if(vertices[j]->key < min_value && !in_tv[j]){
+				min_vertex = j;
+				min_value = vertices[j]->key;
+			}
+		}
+		selected = min_vertex;
+		in_tv[selected] = true;
+
+		Adj_Node* v = adj_list[selected];
 		while(v){
-			if(v->weight < vertices[v->vertex]->key){
+			if(v->weight < vertices[v->vertex]->key && !in_tv[v->vertex]){
 				vertices[v->vertex]->key = v->weight;
 				vertices[v->vertex]->pred = vertices[selected];
-				if(v->weight < min_value){
-					min_vertex = v->vertex;
-					min_value = v->weight;
-				}
 			}
 			v = v->next;
 		}
 		if(min_value==INF){
 			break;
 		}
-		selected = min_vertex;
-		min_value = INF;
 	}
 	if(i<v_num) cout << "no spanning tree" << endl << endl;
 	else{
-		cout << "===== MST result is as below =====" << endl;
 		prim_visualize(vertices, v_num);
 		cout << endl;
 	}
+}
+
+void dijkstra_visualize(int dist[], int pred[], int v_num, int source){
+	string s = "";
+	for(int i=0;i<v_num;i++){
+		cout << "[Vertex #" << i << "]\t";
+		if(source == i){
+			cout << "Source vertex, Length of the path: 0" << endl;
+		}
+		else if(pred[i] >= 0){
+			cout << "Shortest path: ";
+			int temp = i;
+			while(temp!=source){
+				s = "-" + to_string(temp) + s;
+				temp = pred[temp];
+			}
+			s = to_string(source) + s;
+			cout << s;
+			cout << ", Length of the path: " << dist[i] << endl;
+			s = "";
+		}
+		else{
+			cout << "No path exists" << endl;
+		}
+	}
+	cout << endl;
+}
+
+void dijkstra(int** length, int v_num, int e_num, int source){
+	int dist[v_num];
+	int pred[v_num];
+	bool s[v_num];
+	for(int i=0;i<v_num;i++){
+		dist[i] = INF;
+		pred[i] = -1;
+		s[i] = false;
+	}
+	dist[source] = 0;
+	int u;
+	int min_value = INF;
+	for(int i=0;i<v_num;i++){
+		for(int j=0;j<v_num;j++){
+			if(dist[j]<min_value && !s[j]){
+				min_value = dist[j];
+				u = j;
+			}
+		}
+		min_value = INF;
+		s[u]=true;
+		for(int w=0;w<v_num;w++){
+			if(!s[w] && dist[u]+length[u][w] < dist[w]){
+				dist[w] = dist[u]+length[u][w];
+				pred[w] = u;
+			}
+		}
+	}
+	dijkstra_visualize(dist, pred, v_num, source);
 }
