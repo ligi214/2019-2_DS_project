@@ -3,7 +3,7 @@
 
 #include "ds.hpp"
 
-#define	INF	300000000
+#define	INF	INT_MAX
 
 void dfs(Adj_Node** adj_list, int v_num, int e_num);
 void bfs(Adj_Node** adj_list, int v_num, int e_num);

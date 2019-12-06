@@ -95,44 +95,32 @@ int main(){
 			case 1:
 				// Q1. DFS Algorithm
 				cout << "Question #1. Depth First Search algorithm" << endl;
-				cout << "======================================" << endl;
-				cout << " First case : Given graph is directed " << endl;
-				cout << "======================================" << endl;
-				dfs(directed_adj_list, v_num, e_num);
-				
-				cout <<  "=======================================" << endl;
-				cout << "Second case : Given graph is undirected" << endl;
-				cout << "=======================================" << endl;
 				dfs(undirected_adj_list, v_num, e_num);
 				break;
-
 			case 2:
 				cout << "Question #2. Breadth First Search algorithm" << endl;
-				cout << "======================================" << endl;
-				cout << " First case : Given graph is directed " << endl;
-				cout << "======================================" << endl;
-				bfs(directed_adj_list, v_num, e_num);
-				
-				cout << "=======================================" << endl;
-				cout << "Second case : Given graph is undirected" << endl;
-				cout << "=======================================" << endl;
 				bfs(undirected_adj_list, v_num, e_num);
 				break;
-
 			case 3:
 				cout << "Question #3. Minimum Spanning Tree algorithm" << endl;
 				prim(undirected_adj_list, v_num, e_num);
 				break;
-
 			case 4:
 				// Q4. Dijkstra Algorithm (Shortest path)
+				int source;
 				cout << "Question #4. Single Source Shortest Path algorithm" << endl;
-				dijkstra(weights, v_num, e_num, 0);
+				cout << "Input source vertex num : ";
+				cin >> source;
+				cout << endl;
+				if(source >= v_num){
+					cout << "Given source vertex is out of range!" << endl;
+				}
+				else {
+					dijkstra(weights, v_num, e_num, source);
+				}
 				break;
-
 			case 5:
 				exit(1);
-
 			default:
 				cout << "Wrong Question Number" << endl << endl;
 		}

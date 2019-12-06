@@ -220,16 +220,16 @@ void dijkstra(int** length, int v_num, int e_num, int source){
 	int u;
 	int min_value = INF;
 	for(int i=0;i<v_num;i++){
+		min_value = INF;
 		for(int j=0;j<v_num;j++){
 			if(dist[j]<min_value && !s[j]){
 				min_value = dist[j];
 				u = j;
 			}
 		}
-		min_value = INF;
 		s[u]=true;
 		for(int w=0;w<v_num;w++){
-			if(!s[w] && dist[u]+length[u][w] < dist[w]){
+			if(!s[w] && length[u][w]<INF && dist[u]+length[u][w] < dist[w]){
 				dist[w] = dist[u]+length[u][w];
 				pred[w] = u;
 			}
