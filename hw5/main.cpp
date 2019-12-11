@@ -89,6 +89,7 @@ int main(){
 		cout << "Input : ";
 		cin >> question_num;
 		cout << endl;
+		int source;
 
 		switch(question_num)
 		{
@@ -99,7 +100,15 @@ int main(){
 				break;
 			case 2:
 				cout << "Question #2. Breadth First Search algorithm" << endl;
-				bfs(undirected_adj_list, v_num, e_num);
+				cout << "Input source vertex num : ";
+				cin >> source;
+				cout << endl;
+				if(source >= v_num){
+					cout << "Given source vertex is out of range!" << endl;
+				}
+				else {
+					bfs(undirected_adj_list, v_num, e_num, source);
+				}
 				break;
 			case 3:
 				cout << "Question #3. Minimum Spanning Tree algorithm" << endl;
@@ -107,7 +116,6 @@ int main(){
 				break;
 			case 4:
 				// Q4. Dijkstra Algorithm (Shortest path)
-				int source;
 				cout << "Question #4. Single Source Shortest Path algorithm" << endl;
 				cout << "Input source vertex num : ";
 				cin >> source;

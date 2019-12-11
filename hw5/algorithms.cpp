@@ -99,7 +99,7 @@ void bfs_visualize(BFS_Node** vertices, int v_num){
 	}
 }
 
-void bfs(Adj_Node** adj_list, int v_num, int e_num){
+void bfs(Adj_Node** adj_list, int v_num, int e_num, int s){
 	BFS_Node** vertices = new BFS_Node*[v_num];
 	for(int i=0;i<v_num;i++){
 		vertices[i] = (BFS_Node*)(malloc(sizeof(BFS_Node)));
@@ -108,12 +108,7 @@ void bfs(Adj_Node** adj_list, int v_num, int e_num){
 		vertices[i]->color = WHITE;
 		vertices[i]->pred = NULL;
 	}
-
-	for(int i=0;i<v_num;i++){
-		if(vertices[i]->color==WHITE){
-			bfs_visit(adj_list, vertices, v_num, i);
-		}
-	}
+	bfs_visit(adj_list, vertices, v_num, s);
 	bfs_visualize(vertices, v_num);
 	cout << endl;
 }
@@ -148,10 +143,9 @@ void prim(Adj_Node** adj_list, int v_num, int e_num){
 	}
 	int selected = 0;
 	vertices[selected]->key = 0;
-
-	int i;
+	int i; // number of vertices in TV
 	for(i=0;i<v_num;i++){
-		int min_vertex;
+		int min_vertex = v_num;
 		int min_value = INF;
 		for(int j=0;j<v_num;j++){
 			if(vertices[j]->key < min_value && !in_tv[j]){
@@ -159,9 +153,11 @@ void prim(Adj_Node** adj_list, int v_num, int e_num){
 				min_value = vertices[j]->key;
 			}
 		}
-		selected = min_vertex;
-		in_tv[selected] = true;
-
+		selected = min_vertex; // Add vertex 0 at first iteration
+		if(selected >= v_num && min_value == INF){ // no such edge
+			break;
+		}
+		in_tv[selected] = true; // add selected vertex to TV
 		Adj_Node* v = adj_list[selected];
 		while(v){
 			if(v->weight < vertices[v->vertex]->key && !in_tv[v->vertex]){
@@ -169,9 +165,6 @@ void prim(Adj_Node** adj_list, int v_num, int e_num){
 				vertices[v->vertex]->pred = vertices[selected];
 			}
 			v = v->next;
-		}
-		if(min_value==INF){
-			break;
 		}
 	}
 	if(i<v_num) cout << "no spanning tree" << endl << endl;
@@ -221,6 +214,7 @@ void dijkstra(int** length, int v_num, int e_num, int source){
 	int min_value = INF;
 	for(int i=0;i<v_num;i++){
 		min_value = INF;
+		// choose(n)
 		for(int j=0;j<v_num;j++){
 			if(dist[j]<min_value && !s[j]){
 				min_value = dist[j];
